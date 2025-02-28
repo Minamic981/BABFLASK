@@ -39,6 +39,3 @@ def listfile():
 @app.route('/files')
 def files():
     return render_template('files.html')
-
-if __name__ == '__main__':
-    app.run(port=7000, debug=True)
