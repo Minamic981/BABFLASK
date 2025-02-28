@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <style>
+        td {
+            padding: 5px;
+        }
+    </style>
+    <body>
+        <p id="error"></p>
+        <div>
+            <table border="2px" id="files">
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>URL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </body>
+    <script>
+        const table = document.getElementById("files").getElementsByTagName("tbody")[0];
+        function addRow(filename, url) {
+            const newRow = table.insertRow();
+            const filenameCell = newRow.insertCell(0);
+            const urlCell = newRow.insertCell(1);
+            filenameCell.textContent = filename;
+            urlCell.innerHTML = `<a href='${url}'>${url}</a>`;
+        }
+        window.onload = function () {
+            fetch("/listfile", { method: "POST", headers: { "Content-Type": "application/json" } })
+                .then((response) => {
+                    if (!response.ok) {
+                        return response.json().then((errorData) => {
+                            throw new Error(errorData.error);
+                        });
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    const filesj = data.files;
+                    filesj.forEach((file) => {
+                        addRow(file, `/u/${file}`);
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error:", error.message);
+                    // Optionally, display the error message in an HTML element
+                    const errorElement = document.getElementById("error");
+                    errorElement.textContent = error.message;
+                });
+        };
+    </script>
+</html>

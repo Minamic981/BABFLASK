@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #result a {
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <p id="error"></p>
+    <input type="file" multiple>
+    <input type="submit" value="Submit">
+    <p id="result"></p>
+
+    <script>
+        const fileInput = document.querySelector('input[type="file"]');
+        const urlElement = document.getElementById('result');
+        const errorElement = document.getElementById('error');
+        const submitElement = document.querySelector('input[type="submit"]')
+
+        submitElement.addEventListener('click', function(event) {
+            const files = fileInput.files;
+            Array.from(files).forEach(file => {
+                const formData = new FormData();
+                formData.append('file', file);
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.error); // 'file missing parameter'
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const fileUrl = data.url;
+                    const urlItem = document.createElement('a');
+                    urlItem.href = fileUrl;
+                    urlItem.textContent = fileUrl;
+                    urlElement.appendChild(urlItem);
+                })
+                .catch((error) => {
+                    console.error('Error:', error.message);
+                    errorElement.textContent = error.message;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
